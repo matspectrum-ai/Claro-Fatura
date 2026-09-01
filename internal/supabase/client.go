@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -16,6 +17,20 @@ type Client struct {
 	baseURL string
 	apiKey  string
 	http    *http.Client
+}
+
+type HTTPError struct {
+	Status  int
+	Code    string
+	Message string
+	Body    string
+}
+
+func (e *HTTPError) Error() string {
+	if e.Code != "" {
+		return fmt.Sprintf("supabase returned HTTP %d (%s): %s", e.Status, e.Code, e.Message)
+	}
+	return fmt.Sprintf("supabase returned HTTP %d: %s", e.Status, e.Message)
 }
 
 func New(baseURL, apiKey string) *Client {
@@ -34,24 +49,17 @@ func New(baseURL, apiKey string) *Client {
 }
 
 func (c *Client) Select(ctx context.Context, table string, query url.Values, dst any) error {
-	endpoint := c.baseURL + "/rest/v1/" + url.PathEscape(table)
-	if encoded := query.Encode(); encoded != "" {
-		endpoint += "?" + encoded
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+	req, err := c.request(ctx, http.MethodGet, "/rest/v1/"+url.PathEscape(table), query, nil)
 	if err != nil {
 		return err
 	}
-	c.authorize(req)
-
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return fmt.Errorf("supabase select %s: %w", table, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return responseError("select", table, resp)
+		return responseError(resp)
 	}
 	if err := json.NewDecoder(resp.Body).Decode(dst); err != nil {
 		return fmt.Errorf("decode supabase %s: %w", table, err)
@@ -60,38 +68,154 @@ func (c *Client) Select(ctx context.Context, table string, query url.Values, dst
 }
 
 func (c *Client) Insert(ctx context.Context, table string, body any) error {
-	payload, err := json.Marshal(body)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/rest/v1/"+url.PathEscape(table), bytes.NewReader(payload))
-	if err != nil {
-		return err
-	}
-	c.authorize(req)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Prefer", "return=minimal")
+	return c.InsertReturning(ctx, table, nil, body, nil)
+}
 
+func (c *Client) InsertReturning(ctx context.Context, table string, query url.Values, body, dst any) error {
+	req, err := c.request(ctx, http.MethodPost, "/rest/v1/"+url.PathEscape(table), query, body)
+	if err != nil {
+		return err
+	}
+	if dst == nil {
+		req.Header.Set("Prefer", "return=minimal")
+	} else {
+		req.Header.Set("Prefer", "return=representation")
+	}
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return fmt.Errorf("supabase insert %s: %w", table, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return responseError("insert", table, resp)
+		return responseError(resp)
+	}
+	if dst != nil {
+		if err := json.NewDecoder(resp.Body).Decode(dst); err != nil {
+			return fmt.Errorf("decode supabase insert %s: %w", table, err)
+		}
 	}
 	return nil
 }
 
+func (c *Client) Update(ctx context.Context, table string, query url.Values, body any) error {
+	req, err := c.request(ctx, http.MethodPatch, "/rest/v1/"+url.PathEscape(table), query, body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Prefer", "return=minimal")
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return fmt.Errorf("supabase update %s: %w", table, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return responseError(resp)
+	}
+	return nil
+}
+
+func (c *Client) RPC(ctx context.Context, function string, body, dst any) error {
+	req, err := c.request(ctx, http.MethodPost, "/rest/v1/rpc/"+url.PathEscape(function), nil, body)
+	if err != nil {
+		return err
+	}
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return fmt.Errorf("supabase rpc %s: %w", function, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return responseError(resp)
+	}
+	if dst != nil {
+		if err := json.NewDecoder(resp.Body).Decode(dst); err != nil {
+			return fmt.Errorf("decode supabase rpc %s: %w", function, err)
+		}
+	}
+	return nil
+}
+
+func (c *Client) Count(ctx context.Context, table string, query url.Values) (int, error) {
+	q := cloneValues(query)
+	if q.Get("select") == "" {
+		q.Set("select", "id")
+	}
+	req, err := c.request(ctx, http.MethodGet, "/rest/v1/"+url.PathEscape(table), q, nil)
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Prefer", "count=exact")
+	req.Header.Set("Range", "0-0")
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return 0, fmt.Errorf("supabase count %s: %w", table, err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return 0, responseError(resp)
+	}
+	contentRange := resp.Header.Get("Content-Range")
+	parts := strings.Split(contentRange, "/")
+	if len(parts) != 2 || parts[1] == "*" {
+		return 0, fmt.Errorf("supabase count %s returned invalid Content-Range %q", table, contentRange)
+	}
+	count, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, fmt.Errorf("supabase count %s: %w", table, err)
+	}
+	return count, nil
+}
+
+func (c *Client) request(ctx context.Context, method, path string, query url.Values, body any) (*http.Request, error) {
+	endpoint := c.baseURL + path
+	if encoded := query.Encode(); encoded != "" {
+		endpoint += "?" + encoded
+	}
+	var reader io.Reader
+	if body != nil {
+		payload, err := json.Marshal(body)
+		if err != nil {
+			return nil, err
+		}
+		reader = bytes.NewReader(payload)
+	}
+	req, err := http.NewRequestWithContext(ctx, method, endpoint, reader)
+	if err != nil {
+		return nil, err
+	}
+	c.authorize(req)
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	req.Header.Set("Accept", "application/json")
+	return req, nil
+}
+
 func (c *Client) authorize(req *http.Request) {
 	req.Header.Set("apikey", c.apiKey)
-	// Supabase's modern sb_secret_* keys are opaque API keys, not JWT bearer tokens.
 	if !strings.HasPrefix(c.apiKey, "sb_secret_") && !strings.HasPrefix(c.apiKey, "sb_publishable_") {
 		req.Header.Set("Authorization", "Bearer "+c.apiKey)
 	}
 }
 
-func responseError(operation, table string, resp *http.Response) error {
+func responseError(resp *http.Response) error {
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 8<<10))
-	return fmt.Errorf("supabase %s %s returned %s: %s", operation, table, resp.Status, strings.TrimSpace(string(body)))
+	var decoded struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	}
+	_ = json.Unmarshal(body, &decoded)
+	message := decoded.Message
+	if message == "" {
+		message = strings.TrimSpace(string(body))
+	}
+	return &HTTPError{Status: resp.StatusCode, Code: decoded.Code, Message: message, Body: string(body)}
+}
+
+func cloneValues(source url.Values) url.Values {
+	out := make(url.Values, len(source))
+	for key, values := range source {
+		out[key] = append([]string(nil), values...)
+	}
+	return out
 }
