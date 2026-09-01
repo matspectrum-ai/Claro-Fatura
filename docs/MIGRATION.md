@@ -1,38 +1,34 @@
-# Behavior-preserving migration
+# Migração para Go + frontend vanilla
 
-## Objective
+Objetivo: reimplementar o produto atual sem alterar regras de negócio, UX ou schema do banco.
 
-Reimplement the existing Claro Fatura product on a lighter runtime without changing the product's visible behavior, database model, business rules, payment providers, administration capabilities, or import workflow.
+## Stack de destino
 
-## Target stack
+- Frontend público e administrativo: HTML + CSS + JavaScript vanilla.
+- Backend: Go 1.23, biblioteca padrão (`net/http`).
+- Banco: Supabase/PostgreSQL existente.
+- Assets: embutidos no binário Go com `go:embed`.
+- Planilhas: SheetJS 0.18.5 pinado no build e embutido no binário; nenhuma dependência de CDN/Node em runtime.
 
-- Public and admin UI: HTML + CSS + browser JavaScript.
-- Backend: Go using the standard library first.
-- Database/Auth: the existing Supabase project and existing schema.
-- Deployment target: a single Linux VPS behind a reverse proxy. Horizontal replication remains possible without changing application semantics.
+## Milestones concluídos
 
-## Non-goals
+- Consulta pública de fatura por telefone.
+- Geração de PIX, idempotência e Payment Router.
+- CashinPay, ProPix, M2 Pay, NowBanks, PIX estático e REST genérico.
+- Webhooks, confirmação e consulta de status.
+- Frontend público vanilla.
+- Autenticação/admin e recuperação de senha.
+- Dashboard e métricas.
+- Clientes/faturas e importação CSV/XLS/XLSX.
+- Pagamentos, transações e logs.
+- Configuração/roteamento de gateways.
 
-- No redesign.
-- No new product features.
-- No new database product.
-- No microservices.
-- No Kubernetes.
-- No Redis/queue unless load tests demonstrate a concrete bottleneck requiring it.
+## Regra de migração
 
-## Compatibility rules
+O projeto antigo é o oracle de comportamento. A migração não deve alterar regras existentes de gateways, dados, importação, roteamento ou cobrança. Mudanças funcionais devem ser tratadas separadamente da migração de stack.
 
-The snapshot supplied on 2026-09-01 is the behavioral oracle. The rewrite must preserve:
+## Próximo corte
 
-1. Phone-only public lookup.
-2. Phone normalization variants with/without Brazil country code and ninth digit.
-3. Only the latest payable invoice whose due date is inside the current UTC month.
-4. The same payable statuses: `em_aberto`, `vencida`, `em_processamento`, `falhou`, `expirada`.
-5. Access logging must never make a customer lookup fail.
-6. PIX value must use `valor_desconto` exactly as the current implementation does.
-7. Existing gateway routing, idempotency, webhook confirmation, transaction/payment persistence and admin behavior must be ported before cutover.
-8. Existing Supabase tables and data remain authoritative.
-
-## Verification gate
-
-A module is considered migrated only when its characterization tests pass against the preserved behavior. Performance claims require load-test evidence; language choice alone is not evidence of capacity.
+1. Fechar paridade de aliases/endpoints legados ainda expostos pelo projeto original.
+2. Executar verificação final de contratos e build de produção.
+3. Rodar testes de carga e dimensionar a VPS a partir dos resultados medidos.
