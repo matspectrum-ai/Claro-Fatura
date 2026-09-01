@@ -33,6 +33,10 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request) {
 	s.serveWebFile(w, r, "index.html", false)
 }
 
+func (s *Server) adminPage(w http.ResponseWriter, r *http.Request) {
+	s.serveWebFile(w, r, "admin.html", false)
+}
+
 func (s *Server) invoicePage(w http.ResponseWriter, r *http.Request) {
 	phone := strings.TrimSpace(r.PathValue("telefone"))
 	if phone == "" || strings.Contains(phone, "/") {
