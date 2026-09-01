@@ -20,7 +20,17 @@ func TestCreatePIXMatchesCurrentCashinPayPayloadShape(t *testing.T) {
 			t.Fatal(err)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"success":true,"data":{"id":"tx-123","status":"pending","pix":{"copy_paste":"000201PIXCODE","qrcode":"data:image/png;base64,abc"}}}`))
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"success": true,
+			"data": map[string]any{
+				"id": "tx-123",
+				"status": "pending",
+				"pix": map[string]any{
+					"copy_paste": "000201PIXCODE",
+					"qrcode": "data:image/png;base64,abc",
+				},
+			},
+		})
 	}))
 	defer server.Close()
 	client := New("secret", "", "Ebook Viver de Vendas", "cliente@ebookviver.app")
