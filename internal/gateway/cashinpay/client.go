@@ -41,8 +41,8 @@ func New(secretKey, webhookSecret, productName, customerEmail string) *Client {
 				IdleConnTimeout:     90 * time.Second,
 			},
 		},
-		productName:   valueOr(productName, "Fatura"),
-		customerEmail: valueOr(customerEmail, "cliente@clarofatura.app"),
+		productName:   valueOr(productName, gateway.DefaultProductName),
+		customerEmail: valueOr(customerEmail, gateway.DefaultCustomerEmail),
 	}
 }
 
