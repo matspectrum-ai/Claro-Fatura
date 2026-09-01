@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	authsvc "github.com/matspectrum-ai/Claro-Fatura/internal/auth"
 	"github.com/matspectrum-ai/Claro-Fatura/internal/config"
 	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway"
 	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/cashinpay"
@@ -44,6 +45,7 @@ func main() {
 	confirmer := payment.NewConfirmer(store, registry)
 	status := payment.NewStatusService(store, confirmer)
 	webhooks := payment.NewWebhookService(confirmer)
+	adminAuth := authsvc.New(cfg.SupabaseURL, cfg.SupabasePublishableKey, store)
 
 	handler := httpapi.New(httpapi.Dependencies{
 		Invoices: invoice.New(store),
@@ -51,6 +53,7 @@ func main() {
 		Status:   status,
 		Webhooks: webhooks,
 		Access:   store,
+		Auth:     adminAuth,
 		SiteURL:  cfg.SiteURL,
 	}, logger)
 	server := &http.Server{
