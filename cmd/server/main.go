@@ -7,8 +7,16 @@ import (
 	"time"
 
 	"github.com/matspectrum-ai/Claro-Fatura/internal/config"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/cashinpay"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/generic"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/m2pay"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/nowbanks"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/propix"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/gateway/staticpix"
 	"github.com/matspectrum-ai/Claro-Fatura/internal/httpapi"
 	"github.com/matspectrum-ai/Claro-Fatura/internal/invoice"
+	"github.com/matspectrum-ai/Claro-Fatura/internal/payment"
 	"github.com/matspectrum-ai/Claro-Fatura/internal/supabase"
 )
 
@@ -21,13 +29,35 @@ func main() {
 	}
 
 	store := supabase.New(cfg.SupabaseURL, cfg.SupabaseServiceRoleKey)
-	handler := httpapi.New(invoice.New(store), logger)
+	fallback := generic.New()
+	registry := gateway.NewRegistry(
+		fallback,
+		cashinpay.New(cfg.CashinPaySecretKey, cfg.CashinPayWebhookSecret, cfg.ProductName, gateway.DefaultCustomerEmail),
+		propix.New(cfg.ProPixClientID, cfg.ProPixClientSecret, cfg.ProductName, gateway.DefaultCustomerEmail),
+		m2pay.New(cfg.M2PayAPIKey, cfg.ProductName, gateway.DefaultCustomerEmail),
+		nowbanks.New(cfg.NowBanksClientID, cfg.NowBanksClientSecret, cfg.NowBanksWebhookSecret),
+		staticpix.New(cfg.PIXKey, cfg.PIXReceiver, cfg.PIXCity),
+	)
+
+	paymentRouter := payment.NewWithExpiration(store, registry, cfg.ProductName, cfg.PIXExpiration)
+	generator := payment.NewGenerator(store, paymentRouter)
+	confirmer := payment.NewConfirmer(store, registry)
+	status := payment.NewStatusService(store, confirmer)
+	webhooks := payment.NewWebhookService(confirmer)
+
+	handler := httpapi.New(httpapi.Dependencies{
+		Invoices: invoice.New(store),
+		PIX:      generator,
+		Status:   status,
+		Webhooks: webhooks,
+		SiteURL:  cfg.SiteURL,
+	}, logger)
 	server := &http.Server{
 		Addr:              cfg.Addr,
 		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       15 * time.Second,
-		WriteTimeout:      15 * time.Second,
+		WriteTimeout:      35 * time.Second,
 		IdleTimeout:       90 * time.Second,
 	}
 
