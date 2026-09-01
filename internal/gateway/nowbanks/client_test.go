@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -19,10 +20,10 @@ func TestCreatePIXAuthenticatesAndCachesToken(t *testing.T) {
 		switch r.URL.Path {
 		case "/auth/login":
 			authCalls.Add(1)
-			_ = jsonWrite(w, map[string]any{"access_token":"token","expires_in":3600})
+			_ = jsonWrite(w, map[string]any{"access_token": "token", "expires_in": 3600})
 		case "/payments/deposit":
 			if r.Header.Get("Authorization") != "Bearer token" { t.Fatal("auth") }
-			_ = jsonWrite(w, map[string]any{"transaction_id":"n-1","pix_copy_paste":"000201NOW","pix_qr_code":"data:image/png;base64,x","status":"PENDING"})
+			_ = jsonWrite(w, map[string]any{"transaction_id": "n-1", "pix_copy_paste": "000201NOW", "pix_qr_code": "data:image/png;base64,x", "status": "PENDING"})
 		default:
 			http.NotFound(w, r)
 		}
@@ -41,7 +42,8 @@ func TestCreatePIXAuthenticatesAndCachesToken(t *testing.T) {
 
 func TestWebhookHMACCompatibility(t *testing.T) {
 	c := New("id", "secret", "webhook-secret")
-	raw := []byte(`{"data":{"transaction_id":"n-1","status":"COMPLETED"},"event":"payment"}`)
+	raw, err := json.Marshal(map[string]any{"data": map[string]any{"transaction_id": "n-1", "status": "COMPLETED"}, "event": "payment"})
+	if err != nil { t.Fatal(err) }
 	mac := hmac.New(sha256.New, []byte("webhook-secret"))
 	_, _ = mac.Write(raw)
 	req := httptest.NewRequest(http.MethodPost, "/", nil)
