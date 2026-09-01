@@ -31,10 +31,11 @@ jobs:
           node --check internal/httpapi/web/assets/invoice.js
           node --check internal/httpapi/web/assets/auth.js
           node --check internal/httpapi/web/assets/admin.js
+          node --check internal/httpapi/web/assets/admin-activity.js
       - name: Test
         run: go test ./...
       - name: Race detector
-        run: go test -race ./internal/payment ./internal/gateway/... ./internal/httpapi
+        run: go test -race ./internal/payment ./internal/gateway/... ./internal/httpapi ./internal/admin
       - name: Vet
         run: go vet ./...
       - name: Static production build
