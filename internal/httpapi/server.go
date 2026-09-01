@@ -40,6 +40,7 @@ type Dependencies struct {
 	Status   InvoiceStatus
 	Webhooks WebhookHandler
 	Access   PublicAccessLogger
+	Auth     AdminAuth
 	SiteURL  string
 }
 
@@ -56,6 +57,16 @@ func New(deps Dependencies, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("GET /assets/{path...}", s.asset)
 	mux.HandleFunc("GET /favicon.png", s.favicon)
 	mux.HandleFunc("GET /robots.txt", s.robots)
+	mux.HandleFunc("GET /auth", s.authPage)
+	mux.HandleFunc("GET /forgot-password", s.forgotPasswordPage)
+	mux.HandleFunc("GET /reset-password", s.resetPasswordPage)
+	mux.HandleFunc("POST /api/auth/login", s.login)
+	mux.HandleFunc("POST /api/auth/signup", s.signup)
+	mux.HandleFunc("GET /api/auth/me", s.authMe)
+	mux.HandleFunc("POST /api/auth/logout", s.logout)
+	mux.HandleFunc("POST /api/auth/recover", s.recoverPassword)
+	mux.HandleFunc("POST /api/auth/recovery-session", s.recoverySession)
+	mux.HandleFunc("POST /api/auth/password", s.updatePassword)
 	mux.HandleFunc("GET /healthz", s.health)
 	mux.HandleFunc("POST /api/v1/acessos", s.publicAccess)
 	mux.HandleFunc("GET /api/v1/faturas", s.queryInvoices)
