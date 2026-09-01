@@ -37,6 +37,10 @@ func (s *Server) adminPage(w http.ResponseWriter, r *http.Request) {
 	s.serveWebFile(w, r, "admin.html", false)
 }
 
+func (s *Server) adminActivityPage(w http.ResponseWriter, r *http.Request) {
+	s.serveWebFile(w, r, "admin-activity.html", false)
+}
+
 func (s *Server) invoicePage(w http.ResponseWriter, r *http.Request) {
 	phone := strings.TrimSpace(r.PathValue("telefone"))
 	if phone == "" || strings.Contains(phone, "/") {
@@ -55,13 +59,8 @@ func (s *Server) asset(w http.ResponseWriter, r *http.Request) {
 	s.serveWebFile(w, r, path.Join("assets", name), true)
 }
 
-func (s *Server) favicon(w http.ResponseWriter, r *http.Request) {
-	s.serveWebFile(w, r, "favicon.png", true)
-}
-
-func (s *Server) robots(w http.ResponseWriter, r *http.Request) {
-	s.serveWebFile(w, r, "robots.txt", true)
-}
+func (s *Server) favicon(w http.ResponseWriter, r *http.Request) { s.serveWebFile(w, r, "favicon.png", true) }
+func (s *Server) robots(w http.ResponseWriter, r *http.Request) { s.serveWebFile(w, r, "robots.txt", true) }
 
 func (s *Server) serveWebFile(w http.ResponseWriter, r *http.Request, name string, immutable bool) {
 	data, err := fs.ReadFile(webFS, name)
@@ -70,39 +69,21 @@ func (s *Server) serveWebFile(w http.ResponseWriter, r *http.Request, name strin
 		return
 	}
 	contentType := mime.TypeByExtension(path.Ext(name))
-	if contentType == "" {
-		contentType = "application/octet-stream"
-	}
-	if strings.HasSuffix(name, ".html") {
-		contentType = "text/html; charset=utf-8"
-	}
-	if strings.HasSuffix(name, ".js") {
-		contentType = "text/javascript; charset=utf-8"
-	}
-	if strings.HasSuffix(name, ".css") {
-		contentType = "text/css; charset=utf-8"
-	}
+	if contentType == "" { contentType = "application/octet-stream" }
+	if strings.HasSuffix(name, ".html") { contentType = "text/html; charset=utf-8" }
+	if strings.HasSuffix(name, ".js") { contentType = "text/javascript; charset=utf-8" }
+	if strings.HasSuffix(name, ".css") { contentType = "text/css; charset=utf-8" }
 	w.Header().Set("Content-Type", contentType)
-	if immutable {
-		w.Header().Set("Cache-Control", "public, max-age=86400")
-	} else {
-		w.Header().Set("Cache-Control", "no-cache")
-	}
+	if immutable { w.Header().Set("Cache-Control", "public, max-age=86400") } else { w.Header().Set("Cache-Control", "no-cache") }
 	w.Header().Set("Content-Length", itoa(len(data)))
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }
 
 func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
+	if n == 0 { return "0" }
 	var b [24]byte
 	i := len(b)
-	for n > 0 {
-		i--
-		b[i] = byte('0' + n%10)
-		n /= 10
-	}
+	for n > 0 { i--; b[i] = byte('0' + n%10); n /= 10 }
 	return string(b[i:])
 }
