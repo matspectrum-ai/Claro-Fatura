@@ -31,6 +31,7 @@ type Dependencies struct {
 	AdminImporter AdminImporter
 	AdminMetrics AdminMetrics
 	AdminActivity AdminActivity
+	AdminGateways AdminGateways
 	SiteURL string
 }
 
@@ -40,9 +41,10 @@ func New(deps Dependencies, logger *slog.Logger) http.Handler {
 	s:=&Server{deps:deps,logger:logger}; mux:=http.NewServeMux()
 	mux.HandleFunc("GET /",s.home); mux.HandleFunc("GET /fatura/{telefone}",s.invoicePage); mux.HandleFunc("GET /assets/{path...}",s.asset); mux.HandleFunc("GET /favicon.png",s.favicon); mux.HandleFunc("GET /robots.txt",s.robots)
 	mux.HandleFunc("GET /auth",s.authPage); mux.HandleFunc("GET /forgot-password",s.forgotPasswordPage); mux.HandleFunc("GET /reset-password",s.resetPasswordPage)
-	mux.HandleFunc("GET /admin",s.adminPage); mux.HandleFunc("GET /admin/faturas",s.adminPage); mux.HandleFunc("GET /admin/pagamentos",s.adminActivityPage); mux.HandleFunc("GET /admin/transacoes",s.adminActivityPage); mux.HandleFunc("GET /admin/logs",s.adminActivityPage)
+	mux.HandleFunc("GET /admin",s.adminPage); mux.HandleFunc("GET /admin/faturas",s.adminPage); mux.HandleFunc("GET /admin/pagamentos",s.adminActivityPage); mux.HandleFunc("GET /admin/transacoes",s.adminActivityPage); mux.HandleFunc("GET /admin/logs",s.adminActivityPage); mux.HandleFunc("GET /admin/gateways",s.adminGatewaysPage)
 	mux.HandleFunc("POST /api/auth/login",s.login); mux.HandleFunc("POST /api/auth/signup",s.signup); mux.HandleFunc("GET /api/auth/me",s.authMe); mux.HandleFunc("POST /api/auth/logout",s.logout); mux.HandleFunc("POST /api/auth/recover",s.recoverPassword); mux.HandleFunc("POST /api/auth/recovery-session",s.recoverySession); mux.HandleFunc("POST /api/auth/password",s.updatePassword)
 	mux.HandleFunc("GET /api/admin/metricas",s.adminMetrics); mux.HandleFunc("DELETE /api/admin/metricas",s.adminClearMetrics); mux.HandleFunc("GET /api/admin/faturas",s.adminInvoices); mux.HandleFunc("PATCH /api/admin/faturas/{id}",s.adminSaveInvoice); mux.HandleFunc("PATCH /api/admin/faturas/{id}/status",s.adminInvoiceStatus); mux.HandleFunc("POST /api/admin/importar",s.adminImport); mux.HandleFunc("DELETE /api/admin/base",s.adminDeleteAll); mux.HandleFunc("GET /api/admin/pagamentos",s.adminPayments); mux.HandleFunc("GET /api/admin/transacoes",s.adminTransactions); mux.HandleFunc("GET /api/admin/logs",s.adminLogs)
+	mux.HandleFunc("GET /api/admin/gateways",s.adminGateways); mux.HandleFunc("POST /api/admin/gateways",s.adminSaveGateway); mux.HandleFunc("PATCH /api/admin/gateways/{id}",s.adminPatchGateway); mux.HandleFunc("DELETE /api/admin/gateways/{id}",s.adminRemoveGateway); mux.HandleFunc("POST /api/admin/gateways/{id}/somente",s.adminUseOnlyGateway); mux.HandleFunc("POST /api/admin/gateways/ativar-todos",s.adminActivateAllGateways); mux.HandleFunc("GET /api/admin/gateways/webhooks-resumo",s.adminGatewayWebhookSummary); mux.HandleFunc("GET /api/admin/roteamento",s.adminRouting); mux.HandleFunc("POST /api/admin/roteamento",s.adminSaveRouting)
 	mux.HandleFunc("GET /healthz",s.health); mux.HandleFunc("POST /api/v1/acessos",s.publicAccess); mux.HandleFunc("GET /api/v1/faturas",s.queryInvoices); mux.HandleFunc("POST /api/v1/faturas/{id}/pix",s.generatePIX); mux.HandleFunc("POST /api/v1/faturas/{id}/status",s.invoiceStatus); mux.HandleFunc("POST /api/public/webhooks/{slug}",s.webhook)
 	return securityHeaders(accessLog(logger,mux))
 }
