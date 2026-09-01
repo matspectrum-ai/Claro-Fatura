@@ -3,8 +3,7 @@ name: Go verification
 on:
   push:
     branches:
-      - refactor/go-vanilla
-      - refactor/gateways-webhooks-snapshot
+      - 'refactor/**'
   pull_request:
     branches:
       - main
@@ -24,6 +23,6 @@ jobs:
       - name: Test
         run: go test ./...
       - name: Race detector
-        run: go test -race ./internal/payment ./internal/gateway/...
+        run: go test -race ./internal/payment ./internal/gateway/... ./internal/httpapi
       - name: Vet
         run: go vet ./...
