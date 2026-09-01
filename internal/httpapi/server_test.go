@@ -16,7 +16,7 @@ import (
 type invoiceStub struct{}
 func (invoiceStub) QueryByPhone(context.Context,string)(invoice.QueryResult,error){return invoice.QueryResult{},nil}
 type pixStub struct{}
-func (pixStub) Generate(_ context.Context,in payment.GenerateInput)(payment.GeneratedPIX,error){return payment.GeneratedPIX{InvoiceID:in.InvoiceID,CopyPaste:"000201",Gateway:"propix"},nil}
+func (pixStub) Generate(_ context.Context,_ payment.GenerateInput)(payment.GeneratedPIX,error){return payment.GeneratedPIX{CopyPaste:"000201",Gateway:"propix",Available:true},nil}
 type statusStub struct{}
 func (statusStub) Invoice(context.Context,string)(string,error){return "paga",nil}
 type webhookStub struct{}
