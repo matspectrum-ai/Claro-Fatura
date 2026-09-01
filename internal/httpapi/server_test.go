@@ -135,6 +135,10 @@ func TestEmbeddedHomeAndInvoicePages(t *testing.T) {
 		{"/", "Fatura em Dia"},
 		{"/fatura/93999999999", "Sua fatura"},
 		{"/assets/app.css", "--primary"},
+		{"/admin", "Dashboard"},
+		{"/admin/faturas", "Clientes e Faturas"},
+		{"/assets/admin.css", ".admin-header"},
+		{"/assets/admin.js", "runImport"},
 	} {
 		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
 		res := httptest.NewRecorder()
