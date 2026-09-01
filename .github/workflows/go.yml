@@ -32,6 +32,7 @@ jobs:
           node --check internal/httpapi/web/assets/auth.js
           node --check internal/httpapi/web/assets/admin.js
           node --check internal/httpapi/web/assets/admin-activity.js
+          node --check internal/httpapi/web/assets/admin-gateways.js
       - name: Test
         run: go test ./...
       - name: Race detector
