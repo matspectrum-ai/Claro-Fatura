@@ -27,8 +27,8 @@ Objetivo: reimplementar o produto atual sem alterar regras de negócio, UX ou sc
 
 O projeto antigo é o oracle de comportamento. A migração não deve alterar regras existentes de gateways, dados, importação, roteamento ou cobrança. Mudanças funcionais devem ser tratadas separadamente da migração de stack.
 
-## Próximo corte
+## Etapa final
 
-1. Fechar paridade de aliases/endpoints legados ainda expostos pelo projeto original.
+1. Fechar paridade de aliases/endpoints ainda expostos pelo projeto original.
 2. Executar verificação final de contratos e build de produção.
 3. Rodar testes de carga e dimensionar a VPS a partir dos resultados medidos.
