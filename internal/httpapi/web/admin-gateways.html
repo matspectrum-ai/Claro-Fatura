@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Gateways de pagamento — Painel administrativo</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/assets/app.css">
+  <link rel="stylesheet" href="/assets/admin.css">
+  <link rel="stylesheet" href="/assets/admin-gateways.css">
+</head>
+<body class="admin-body">
+<header class="admin-header">
+  <div class="admin-header-row shell admin-shell">
+    <a href="/" class="admin-brand"><img src="/assets/logo-claro.png" alt="Logo da operadora"></a>
+    <button class="admin-ghost" id="logout" type="button">↪ <span>Sair</span></button>
+  </div>
+  <nav class="admin-nav shell admin-shell" aria-label="Administração">
+    <a href="/admin" data-nav="dashboard">▥ <span>Dashboard</span></a>
+    <a href="/admin/faturas" data-nav="faturas">▤ <span>Clientes e Faturas</span></a>
+    <a href="/admin/pagamentos" data-nav="pagamentos">▧ <span>Pagamentos</span></a>
+    <a href="/admin/gateways" data-nav="gateways" class="active">⇄ <span>Gateways</span></a>
+    <a href="/admin/transacoes" data-nav="transacoes">▣ <span>Transações PIX</span></a>
+    <a href="/admin/logs" data-nav="logs">☷ <span>Logs</span></a>
+  </nav>
+</header>
+
+<main class="shell admin-shell admin-main">
+  <div class="admin-title-row">
+    <div>
+      <h1>Gateways de pagamento</h1>
+      <p>Cadastre as gateways, defina prioridade e escolha como o sistema distribui as cobranças PIX. Se uma gateway falhar, a próxima ativa assume automaticamente.</p>
+    </div>
+    <div class="admin-actions">
+      <button class="admin-btn primary" id="new-gateway" type="button">＋ Nova gateway</button>
+    </div>
+  </div>
+
+  <section class="gateway-panel">
+    <div class="gateway-panel-head">
+      <div>
+        <h2>Estratégia de roteamento</h2>
+        <p id="routing-description">Carregando...</p>
+      </div>
+    </div>
+    <div class="gateway-routing-row">
+      <label>
+        <span class="field-label">Estratégia</span>
+        <select id="routing-strategy" class="gateway-select">
+          <option value="prioridade">Prioridade (ordem fixa)</option>
+          <option value="rodizio">Rodízio (round-robin)</option>
+          <option value="fixa">Gateway específica</option>
+        </select>
+      </label>
+      <label id="fixed-gateway-wrap" hidden>
+        <span class="field-label">Gateway específica</span>
+        <select id="fixed-gateway" class="gateway-select"><option value="">Escolha a gateway</option></select>
+      </label>
+    </div>
+    <label class="gateway-toggle-card" for="new-pix-per-access">
+      <input type="checkbox" id="new-pix-per-access">
+      <span>
+        <strong>Gerar novo PIX a cada acesso</strong>
+        <small>Ligado: cada visita à página de pagamento cria uma cobrança nova na gateway. Desligado: reaproveita a cobrança pendente enquanto ela estiver válida.</small>
+      </span>
+    </label>
+  </section>
+
+  <section class="gateway-panel webhook-help">
+    <div class="gateway-panel-head">
+      <div><h2>Como configurar o webhook na gateway</h2><p>Vale para qualquer gateway cadastrada aqui.</p></div>
+    </div>
+    <ol>
+      <li>Copie o endereço de webhook exibido no cartão da gateway abaixo.</li>
+      <li>No painel da gateway, cole esse endereço no campo de webhook / postback / callback, com método <strong>POST</strong>.</li>
+      <li>Salve e faça um pagamento de teste.</li>
+      <li>Confira em <strong>Logs → Webhooks recebidos</strong> se a chamada chegou, e em <strong>Pagamentos recebidos</strong> quem pagou.</li>
+    </ol>
+  </section>
+
+  <div id="gateway-list" class="gateway-list"><div class="admin-empty">Carregando...</div></div>
+</main>
+
+<dialog class="admin-dialog" id="gateway-dialog">
+  <form method="dialog" class="dialog-card gateway-dialog-card" id="gateway-form">
+    <div class="dialog-head">
+      <div>
+        <h2 id="gateway-dialog-title">Nova gateway</h2>
+        <p>As chaves nunca são gravadas aqui: informe apenas o NOME dos segredos guardados no backend.</p>
+      </div>
+      <button class="icon-close" value="cancel" aria-label="Fechar">×</button>
+    </div>
+    <input type="hidden" id="gateway-id">
+    <div class="form-grid gateway-form-grid">
+      <label>Nome<input id="gateway-label" required maxlength="80"></label>
+      <label>Identificador<input id="gateway-slug" required maxlength="40" placeholder="minha-gateway"></label>
+      <label>Adaptador<select id="gateway-adapter"><option value="generico">REST genérico</option><option value="cashinpay">CashinPay</option><option value="propix">ProPix</option><option value="m2pay">M2 Pay</option><option value="nowbanks">NowBanks</option><option value="pix-estatico">PIX estático</option></select></label>
+      <label>Ambiente<select id="gateway-environment"><option value="producao">Produção</option><option value="teste">Teste</option></select></label>
+      <label class="span-2">URL da API (criação de PIX)<input id="gateway-api-url" placeholder="https://api.gateway.com/v1/pix"></label>
+      <label>Prioridade<input id="gateway-priority" inputmode="numeric" value="50"></label>
+      <label>Limite diário (opcional)<input id="gateway-daily-limit" inputmode="numeric"></label>
+      <label class="span-2">URL de webhook (opcional)<input id="gateway-webhook-url"></label>
+      <label class="span-2">Nomes dos segredos (separados por vírgula)<input id="gateway-secret-names" placeholder="MINHAGW_TOKEN, MINHAGW_SECRET"></label>
+      <label class="span-2">Observações<textarea id="gateway-observations" rows="3"></textarea></label>
+    </div>
+    <label class="gateway-toggle-card compact-toggle" for="gateway-active"><input type="checkbox" id="gateway-active"><span><strong>Gateway ativa</strong></span></label>
+    <div class="dialog-actions">
+      <button class="admin-btn outline" value="cancel" type="button" id="gateway-cancel">Cancelar</button>
+      <button class="admin-btn primary" type="submit" id="gateway-save">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/assets/admin-gateways.js" defer></script>
+</body>
+</html>
