@@ -35,3 +35,6 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Build-time vendored frontend dependency
+internal/httpapi/web/assets/vendor/xlsx.full.min.js
