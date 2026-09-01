@@ -50,6 +50,7 @@ func main() {
 		PIX:      generator,
 		Status:   status,
 		Webhooks: webhooks,
+		Access:   store,
 		SiteURL:  cfg.SiteURL,
 	}, logger)
 	server := &http.Server{

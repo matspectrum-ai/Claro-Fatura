@@ -20,9 +20,21 @@ jobs:
         with:
           go-version: '1.23.x'
           cache: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: false
+      - name: JavaScript syntax
+        run: |
+          node --check internal/httpapi/web/assets/home.js
+          node --check internal/httpapi/web/assets/invoice.js
       - name: Test
         run: go test ./...
       - name: Race detector
         run: go test -race ./internal/payment ./internal/gateway/... ./internal/httpapi
       - name: Vet
         run: go vet ./...
+      - name: Static production build
+        run: |
+          CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o /tmp/claro-fatura ./cmd/server
+          ls -lh /tmp/claro-fatura

@@ -30,11 +30,16 @@ type WebhookHandler interface {
 	Handle(context.Context, *http.Request, string, []byte) payment.WebhookResult
 }
 
+type PublicAccessLogger interface {
+	LogPublicAccess(context.Context, string) error
+}
+
 type Dependencies struct {
 	Invoices InvoiceLookup
 	PIX      PIXGenerator
 	Status   InvoiceStatus
 	Webhooks WebhookHandler
+	Access   PublicAccessLogger
 	SiteURL  string
 }
 
@@ -46,7 +51,13 @@ type Server struct {
 func New(deps Dependencies, logger *slog.Logger) http.Handler {
 	s := &Server{deps: deps, logger: logger}
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /", s.home)
+	mux.HandleFunc("GET /fatura/{telefone}", s.invoicePage)
+	mux.HandleFunc("GET /assets/{path...}", s.asset)
+	mux.HandleFunc("GET /favicon.png", s.favicon)
+	mux.HandleFunc("GET /robots.txt", s.robots)
 	mux.HandleFunc("GET /healthz", s.health)
+	mux.HandleFunc("POST /api/v1/acessos", s.publicAccess)
 	mux.HandleFunc("GET /api/v1/faturas", s.queryInvoices)
 	mux.HandleFunc("POST /api/v1/faturas/{id}/pix", s.generatePIX)
 	mux.HandleFunc("POST /api/v1/faturas/{id}/status", s.invoiceStatus)
@@ -56,6 +67,24 @@ func New(deps Dependencies, logger *slog.Logger) http.Handler {
 
 func (s *Server) health(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (s *Server) publicAccess(w http.ResponseWriter, r *http.Request) {
+	if s.deps.Access == nil {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	var body struct {
+		Pagina string `json:"pagina"`
+	}
+	if err := decodeJSON(r, &body); err != nil || body.Pagina != "/" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if err := s.deps.Access.LogPublicAccess(r.Context(), "/"); err != nil {
+		s.logger.Warn("public access log failed", "error", err)
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *Server) queryInvoices(w http.ResponseWriter, r *http.Request) {
