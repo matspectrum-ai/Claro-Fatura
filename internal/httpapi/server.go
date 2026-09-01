@@ -44,6 +44,7 @@ type Dependencies struct {
 	AdminInvoices AdminInvoices
 	AdminImporter AdminImporter
 	AdminMetrics  AdminMetrics
+	AdminActivity AdminActivity
 	SiteURL       string
 }
 
@@ -65,6 +66,9 @@ func New(deps Dependencies, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("GET /reset-password", s.resetPasswordPage)
 	mux.HandleFunc("GET /admin", s.adminPage)
 	mux.HandleFunc("GET /admin/faturas", s.adminPage)
+	mux.HandleFunc("GET /admin/pagamentos", s.adminPage)
+	mux.HandleFunc("GET /admin/transacoes", s.adminPage)
+	mux.HandleFunc("GET /admin/logs", s.adminPage)
 	mux.HandleFunc("POST /api/auth/login", s.login)
 	mux.HandleFunc("POST /api/auth/signup", s.signup)
 	mux.HandleFunc("GET /api/auth/me", s.authMe)
@@ -79,6 +83,9 @@ func New(deps Dependencies, logger *slog.Logger) http.Handler {
 	mux.HandleFunc("PATCH /api/admin/faturas/{id}/status", s.adminInvoiceStatus)
 	mux.HandleFunc("POST /api/admin/importar", s.adminImport)
 	mux.HandleFunc("DELETE /api/admin/base", s.adminDeleteAll)
+	mux.HandleFunc("GET /api/admin/pagamentos", s.adminPayments)
+	mux.HandleFunc("GET /api/admin/transacoes", s.adminTransactions)
+	mux.HandleFunc("GET /api/admin/logs", s.adminLogs)
 	mux.HandleFunc("GET /healthz", s.health)
 	mux.HandleFunc("POST /api/v1/acessos", s.publicAccess)
 	mux.HandleFunc("GET /api/v1/faturas", s.queryInvoices)
@@ -142,19 +149,12 @@ func (s *Server) generatePIX(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"erro": "Dados inválidos."})
 		return
 	}
-	result, err := s.deps.PIX.Generate(r.Context(), payment.GenerateInput{
-		InvoiceID:  invoiceID,
-		RequestKey: body.RequestKey,
-		Force:      body.Force,
-		BaseURL:    requestBaseURL(r, s.deps.SiteURL),
-	})
+	result, err := s.deps.PIX.Generate(r.Context(), payment.GenerateInput{InvoiceID: invoiceID, RequestKey: body.RequestKey, Force: body.Force, BaseURL: requestBaseURL(r, s.deps.SiteURL)})
 	if err != nil {
 		switch {
 		case errors.Is(err, payment.ErrInvoiceNotFound):
 			writeJSON(w, http.StatusNotFound, map[string]string{"erro": "Fatura não encontrada."})
-		case errors.Is(err, payment.ErrAlreadyProcessing):
-			writeJSON(w, http.StatusConflict, map[string]string{"erro": err.Error()})
-		case errors.Is(err, payment.ErrRequestUsed):
+		case errors.Is(err, payment.ErrAlreadyProcessing), errors.Is(err, payment.ErrRequestUsed):
 			writeJSON(w, http.StatusConflict, map[string]string{"erro": err.Error()})
 		default:
 			s.logger.Error("pix generation failed", "invoice_id", invoiceID, "error", err)
