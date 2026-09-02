@@ -53,6 +53,32 @@ jobs:
         run: go test -race ./internal/payment ./internal/gateway/... ./internal/httpapi ./internal/admin ./internal/legacy
       - name: Vet
         run: go vet ./...
+      - name: Graceful shutdown smoke
+        run: |
+          go build -o /tmp/claro-fatura-smoke ./cmd/server
+          SUPABASE_URL=http://127.0.0.1:9 \
+          SUPABASE_SERVICE_ROLE_KEY=test \
+          ADDR=127.0.0.1:18080 \
+          /tmp/claro-fatura-smoke >/tmp/claro-fatura-smoke.log 2>&1 &
+          pid=$!
+          cleanup() { kill -KILL "$pid" 2>/dev/null || true; }
+          trap cleanup EXIT
+          healthy=0
+          for _ in $(seq 1 20); do
+            if curl --fail --silent --max-time 1 http://127.0.0.1:18080/healthz >/dev/null; then
+              healthy=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$healthy" -ne 1 ]; then
+            cat /tmp/claro-fatura-smoke.log
+            exit 1
+          fi
+          kill -TERM "$pid"
+          wait "$pid"
+          trap - EXIT
+          grep -q 'shutdown complete' /tmp/claro-fatura-smoke.log
       - name: Static production build
         run: |
           mkdir -p artifacts
