@@ -12,6 +12,13 @@ if [[ -z "$DOMAIN" ]]; then
   echo "Uso: sudo bash deploy/bootstrap-vps.sh <dominio>" >&2
   exit 1
 fi
+if [[ ! "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || [[ "$DOMAIN" == .* ]] || [[ "$DOMAIN" == *..* ]]; then
+  echo "Domínio inválido: $DOMAIN" >&2
+  exit 1
+fi
+for cmd in useradd install sed nginx systemctl; do
+  command -v "$cmd" >/dev/null 2>&1 || { echo "Comando obrigatório ausente: $cmd" >&2; exit 1; }
+done
 
 if ! id claro-fatura >/dev/null 2>&1; then
   useradd --system --home /nonexistent --shell /usr/sbin/nologin claro-fatura
