@@ -23,8 +23,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.x'
-      - name: Vendor pinned SheetJS
-        run: bash scripts/fetch-sheetjs.sh
+      - name: Vendor pinned frontend assets
+        run: |
+          bash scripts/fetch-sheetjs.sh
+          bash scripts/fetch-qrcode.sh
       - name: JavaScript syntax
         run: |
           node --check internal/httpapi/web/assets/home.js
@@ -33,6 +35,7 @@ jobs:
           node --check internal/httpapi/web/assets/admin.js
           node --check internal/httpapi/web/assets/admin-activity.js
           node --check internal/httpapi/web/assets/admin-gateways.js
+          node --check internal/httpapi/web/assets/vendor/qrcode.min.js
       - name: Test
         run: go test ./...
       - name: Race detector
