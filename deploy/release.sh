@@ -20,7 +20,7 @@ if [[ ! -f /etc/claro-fatura/claro-fatura.env ]]; then
   echo "Arquivo /etc/claro-fatura/claro-fatura.env ausente." >&2
   exit 1
 fi
-for cmd in install readlink ln systemctl curl seq sed; do
+for cmd in install readlink ln mv systemctl curl seq sed; do
   command -v "$cmd" >/dev/null 2>&1 || { echo "Comando obrigatório ausente: $cmd" >&2; exit 1; }
 done
 
@@ -28,6 +28,13 @@ BASE=/opt/claro-fatura
 RELEASE="$BASE/releases/$RELEASE_ID"
 CURRENT="$BASE/current"
 PREVIOUS="$BASE/previous"
+
+atomic_link() {
+  local target="$1" link="$2" tmp="${2}.tmp.$$"
+  rm -f "$tmp"
+  ln -s "$target" "$tmp"
+  mv -Tf "$tmp" "$link"
+}
 
 if [[ -e "$RELEASE" ]]; then
   echo "Release já existe: $RELEASE" >&2
@@ -41,10 +48,10 @@ chown -R root:root "$RELEASE"
 old=""
 if [[ -L "$CURRENT" ]]; then
   old="$(readlink -f "$CURRENT")"
-  ln -sfn "$old" "$PREVIOUS"
+  atomic_link "$old" "$PREVIOUS"
 fi
 
-ln -sfn "$RELEASE" "$CURRENT"
+atomic_link "$RELEASE" "$CURRENT"
 systemctl daemon-reload
 systemctl restart claro-fatura.service
 
@@ -61,7 +68,7 @@ if [[ "$healthy" -ne 1 ]]; then
   echo "Health check falhou para $RELEASE_ID." >&2
   if [[ -n "$old" ]]; then
     echo "Restaurando release anterior: $old" >&2
-    ln -sfn "$old" "$CURRENT"
+    atomic_link "$old" "$CURRENT"
     systemctl restart claro-fatura.service
   else
     systemctl stop claro-fatura.service || true
