@@ -1,0 +1,13 @@
+[hidden]{display:none!important}
+.brand-white-logo{display:block;width:auto;height:36px;padding:0 12px;object-fit:contain}
+.lucide{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon-sm{width:16px;height:16px;flex:0 0 16px}
+.icon-md{width:20px;height:20px;flex:0 0 20px}
+.icon-xl{width:48px;height:48px}
+.feature-icon,.step-icon{display:grid;place-items:center;font-size:initial;line-height:normal}
+.feature-icon{color:var(--primary)}
+.step-icon{color:#fff}
+.check-grid li{align-items:center}
+.check-grid .lucide{color:var(--primary)}
+.secure-note .lucide{color:currentColor}
+.auth-form[hidden]{display:none!important}
