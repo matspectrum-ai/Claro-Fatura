@@ -40,6 +40,18 @@ jobs:
           grep -q 'logo-claro-white.png' internal/httpapi/web/index.html
           grep -q 'visual-parity.css' internal/httpapi/web/auth.html
           grep -Fq '[hidden]{display:none!important}' internal/httpapi/web/assets/visual-parity.css
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image
+          for name in (
+              'internal/httpapi/web/assets/banner-casal.webp',
+              'internal/httpapi/web/assets/logo-claro.png',
+              'internal/httpapi/web/assets/logo-claro-white.png',
+          ):
+              with Image.open(name) as image:
+                  image.load()
+                  assert image.width > 0 and image.height > 0, name
+          PY
       - name: JavaScript syntax
         run: |
           node --check internal/httpapi/web/assets/home.js
@@ -86,6 +98,13 @@ jobs:
             cat /tmp/claro-fatura-smoke.log
             exit 1
           fi
+          curl --fail --silent --show-error http://127.0.0.1:18080/assets/banner-casal.webp -o /tmp/banner-casal.webp
+          python3 - <<'PY'
+          from PIL import Image
+          with Image.open('/tmp/banner-casal.webp') as image:
+              image.load()
+              assert image.width > 0 and image.height > 0
+          PY
           kill -TERM "$pid"
           wait "$pid"
           trap - EXIT
