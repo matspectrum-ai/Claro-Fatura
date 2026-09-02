@@ -1,0 +1,45 @@
+[Unit]
+Description=Claro Fatura Go service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=claro-fatura
+Group=claro-fatura
+WorkingDirectory=/opt/claro-fatura/current
+EnvironmentFile=/etc/claro-fatura/claro-fatura.env
+ExecStart=/opt/claro-fatura/current/claro-fatura
+Restart=always
+RestartSec=2s
+TimeoutStopSec=20s
+KillSignal=SIGTERM
+
+# Capacity / file descriptors
+LimitNOFILE=131072
+
+# Sandboxing: the application is stateless on disk at runtime.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+# Logs stay in journald/stdout; no writable application directory is required.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=claro-fatura
+
+[Install]
+WantedBy=multi-user.target
