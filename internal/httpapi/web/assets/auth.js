@@ -20,6 +20,8 @@
 
   if(page==='reset'){
     const form=document.querySelector('#reset-form'),invalid=document.querySelector('#reset-invalid');
+    const toggle=document.querySelector('.password-toggle');
+    if(toggle){toggle.addEventListener('click',()=>{const input=form.querySelector('input[name="senha"]');const showing=input.type==='text';input.type=showing?'password':'text';toggle.setAttribute('aria-pressed',String(!showing));toggle.setAttribute('aria-label',showing?'Mostrar senha':'Ocultar senha');toggle.querySelector('.eye-on').hidden=!showing;toggle.querySelector('.eye-off').hidden=showing})}
     const boot=async()=>{const p=new URLSearchParams(location.hash.replace(/^#/,''));const access=p.get('access_token'),refresh=p.get('refresh_token'),type=p.get('type');if(type==='recovery'&&access){try{await api('/api/auth/recovery-session',{method:'POST',body:JSON.stringify({access_token:access,refresh_token:refresh||'',expires_in:Number(p.get('expires_in'))||3600})});history.replaceState(null,'',location.pathname);form.hidden=false;return}catch{}}const me=await fetch('/api/auth/me').catch(()=>null);if(me&&me.ok){form.hidden=false}else invalid.hidden=false};boot();
     form.addEventListener('submit',async e=>{e.preventDefault();const f=new FormData(form),a=String(f.get('senha')||''),b=String(f.get('confirmar')||'');if(a.length<6){show('A senha deve ter pelo menos 6 caracteres.');return}if(a!==b){show('Digite a mesma senha nos dois campos.');return}busy(form,true);message.hidden=true;try{await api('/api/auth/password',{method:'POST',body:JSON.stringify({senha:a})});show('Senha redefinida. Faça login para continuar.','ok');setTimeout(()=>location.replace('/auth'),900)}catch(err){show(err.message)}finally{busy(form,false)}});
   }
