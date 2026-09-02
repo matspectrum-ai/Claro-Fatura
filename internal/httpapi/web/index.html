@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Fatura em Dia — Consulte e pague sua fatura</title>
+  <meta name="description" content="Consulte sua fatura pelo número de telefone, veja o valor com desconto, o vencimento e pague na hora. Consulta grátis, segura e 100% online.">
+  <meta property="og:title" content="Fatura em Dia — Consulta de faturas por telefone">
+  <meta property="og:description" content="Digite seu telefone e veja sua fatura: valor original, valor com desconto, vencimento e status.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/assets/app.css">
+  <script defer src="/assets/home.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a href="/" aria-label="Fatura em Dia"><img class="brand brand-white" src="/assets/logo-claro.png" alt="Logo da operadora Claro"></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-image">
+          <img src="/assets/banner-casal.webp" alt="Casal sorrindo observando a tela de um laptop">
+          <div class="hero-overlay"></div>
+          <div class="hero-copy">
+            <div>
+              <h1>Fatura em Dia</h1>
+              <p>Pague sua fatura em dia e garanta descontos imperdíveis.</p>
+            </div>
+          </div>
+        </div>
+        <div class="hero-form-wrap">
+          <form id="consulta-form" class="consulta-form" novalidate>
+            <p class="eyebrow light underlined">Consulta pelo telefone</p>
+            <label class="sr-only" for="telefone">Digite seu telefone</label>
+            <input id="telefone" class="phone-input" inputmode="numeric" autocomplete="off" placeholder="Digite seu número de celular" maxlength="16">
+            <label class="terms"><input id="aceite" type="checkbox"><span>Li e aceito os <strong><u>Termos de Uso e Política de Privacidade.</u></strong></span></label>
+            <button id="consultar" class="button button-cta button-large" type="submit" disabled>Consultar Fatura</button>
+            <p class="secure-note"><span class="icon">✓</span> Mostramos apenas os dados vinculados ao telefone informado.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell benefits" aria-label="Benefícios">
+      <article class="benefit-card"><div class="feature-icon">⌁</div><h2>Aproveite descontos imperdíveis 100% online</h2></article>
+      <article class="benefit-card"><div class="feature-icon">⚖</div><h2>Acordo sem burocracia</h2></article>
+      <article class="benefit-card"><div class="feature-icon">◎</div><h2>Aproveite descontos imperdíveis onde e quando quiser</h2></article>
+      <article class="benefit-card"><div class="feature-icon">◇</div><h2>Quitação ágil e segura</h2></article>
+    </section>
+
+    <section class="shell how-wrap">
+      <div class="how">
+        <span class="how-label">Veja como funciona:</span>
+        <ol class="steps">
+          <li><div class="step-icon">▣</div><p><strong>1.</strong> Informe o seu telefone</p></li>
+          <li><div class="step-icon">▤</div><p><strong>2.</strong> Consulte os detalhes da sua fatura em aberto</p></li>
+          <li><div class="step-icon">⇄</div><p><strong>3.</strong> Aproveite descontos imperdíveis disponíveis para você</p></li>
+          <li><div class="step-icon">▥</div><p><strong>4.</strong> Escolha pagar na hora com PIX</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="shell institutional">
+      <h2>Bem-vindo ao Portal Fatura em Dia!</h2>
+      <p><strong>Aqui você pode:</strong></p>
+      <ul class="check-grid">
+        <li><b>✓</b> Consultar sua fatura</li><li><b>✓</b> Ver o valor com desconto</li>
+        <li><b>✓</b> Solicitar a 2ª via</li><li><b>✓</b> Pagar sua fatura por PIX</li>
+      </ul>
+      <p class="muted prose">O portal é uma plataforma online que permite consultar e quitar faturas de forma simples, rápida, segura e com os melhores descontos. Você acessa com o seu telefone celular, vê os detalhes da sua fatura — valor original, valor com desconto, vencimento e status — e paga na hora, sem precisar de atendente ou ligação telefônica.</p>
+    </section>
+
+    <section class="faq-section">
+      <div class="shell faq-inner">
+        <h2>Perguntas frequentes</h2>
+        <p class="muted">Ainda com dúvidas? Consulte abaixo as principais perguntas de outros clientes.</p>
+        <div class="faq-list">
+          <details><summary>O que é o portal de consulta de faturas?</summary><p>É um portal que permite consultar e quitar suas faturas em aberto de forma online, segura, prática e sem complicações — no momento e no lugar que você quiser.</p></details>
+          <details><summary>Como consultar minha fatura?</summary><p>Basta digitar o seu telefone celular e clicar em Consultar Fatura. Você verá o nome do titular, o valor original, o valor com desconto, o vencimento e o status.</p></details>
+          <details><summary>Não lembro qual telefone está cadastrado. O que faço?</summary><p>No momento, a consulta é feita exclusivamente pelo número de telefone celular do cliente. Em caso de dúvida, entre em contato com o atendimento para confirmar o cadastro.</p></details>
+          <details><summary>Como funciona o pagamento?</summary><p>Ao clicar em Pagar Agora, sua solicitação é registrada e o pagamento é feito via PIX. O código copia e cola é gerado para você colar no aplicativo do seu banco.</p></details>
+          <details><summary>Posso pagar com cartão de crédito?</summary><p>No momento o pagamento é feito via PIX. Novas formas de pagamento poderão ser habilitadas futuramente.</p></details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="shell footer-inner"><img class="brand footer-logo" src="/assets/logo-claro.png" alt="Logo da operadora Claro"><p>Consulta de faturas e pagamento por PIX · Atendimento 100% online.</p></div></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

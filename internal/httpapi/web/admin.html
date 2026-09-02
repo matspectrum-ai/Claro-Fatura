@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Administração — Fatura em Dia</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/assets/app.css">
+  <link rel="stylesheet" href="/assets/admin.css">
+</head>
+<body class="admin-body">
+  <header class="admin-header">
+    <div class="admin-header-row shell admin-shell">
+      <a href="/" class="admin-brand"><img src="/assets/logo-claro.png" alt="Logo da operadora"></a>
+      <button class="admin-ghost" id="logout" type="button">↪ <span>Sair</span></button>
+    </div>
+    <nav class="admin-nav shell admin-shell" aria-label="Administração">
+      <a href="/admin" data-nav="dashboard">▥ <span>Dashboard</span></a>
+      <a href="/admin/faturas" data-nav="faturas">▤ <span>Clientes e Faturas</span></a>
+      <a href="/admin/pagamentos" data-nav="pagamentos">▧ <span>Pagamentos</span></a>
+      <a href="/admin/gateways" data-nav="gateways">⇄ <span>Gateways</span></a>
+      <a href="/admin/transacoes" data-nav="transacoes">▣ <span>Transações PIX</span></a>
+      <a href="/admin/logs" data-nav="logs">☷ <span>Logs</span></a>
+    </nav>
+  </header>
+
+  <main class="shell admin-shell admin-main">
+    <section id="dashboard-view" hidden>
+      <div class="admin-title-row">
+        <div><h1>Dashboard</h1><p>Clientes, faturas visualizadas e valor total visualizado.</p></div>
+        <button class="admin-btn danger compact" id="clear-history" type="button">🗑 <span>Limpar histórico</span></button>
+      </div>
+      <div class="metric-grid" id="metric-grid">
+        <article class="metric-card"><div><p>Clientes que acessaram a página</p><span>✓</span></div><strong data-metric="clientes_total">…</strong><small>Telefones únicos que consultaram a fatura</small></article>
+        <article class="metric-card"><div><p>Clientes no banco de dados</p><span>♟</span></div><strong data-metric="clientes_banco">…</strong><small>Total de clientes cadastrados</small></article>
+        <article class="metric-card"><div><p>Total de faturas visualizadas</p><span>▤</span></div><strong data-metric="faturas_visualizadas_total">…</strong><small>Um registro por cliente, mesmo com vários acessos</small></article>
+        <article class="metric-card"><div><p>Valor total visualizado</p><span>▤</span></div><strong data-metric="valor_visualizado_total">…</strong><small>Soma do valor com desconto do primeiro acesso de cada cliente</small></article>
+      </div>
+    </section>
+
+    <section id="invoices-view" hidden>
+      <div class="admin-title-row"><div><h1>Clientes e Faturas</h1><p>Importe a planilha, pesquise por telefone ou nome e gerencie os valores em uma única tela.</p></div><div class="admin-actions"><button class="admin-btn primary" id="open-import" type="button">⇧ <span>Importar Planilha</span></button><button class="admin-btn danger" id="open-delete" type="button">🗑 <span>Apagar tudo</span></button></div></div>
+      <form class="admin-search" id="search-form"><span>⌕</span><input id="search" autocomplete="off" placeholder="Pesquisar por telefone ou nome do cliente"></form>
+      <div class="invoice-list" id="invoice-list"><div class="admin-empty">Carregando...</div></div>
+      <div class="pagination" id="pagination" hidden><p id="pagination-label"></p><div><button class="admin-btn outline compact" id="prev-page" type="button">Anterior</button><button class="admin-btn outline compact" id="next-page" type="button">Próxima</button></div></div>
+    </section>
+
+    <section id="payments-view" hidden>
+      <div class="admin-title-row"><div><h1>Pagamentos recebidos</h1><p>Quem pagou, por qual gateway e como o pagamento foi confirmado. Atualiza sozinho.</p></div></div>
+      <div class="filter-row"><form class="admin-search grow" id="payments-search-form"><span>⌕</span><input id="payments-search" autocomplete="off" placeholder="Pesquisar por telefone ou nome do cliente"></form><select class="filter-select" id="payments-gateway"><option value="todas">Todas as gateways</option></select><select class="filter-select" id="payments-days"><option value="1">Últimas 24 horas</option><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select></div>
+      <div class="summary-card"><p id="payments-summary">Carregando...</p></div>
+      <div class="invoice-list" id="payments-list"><div class="admin-empty">Carregando...</div></div>
+    </section>
+
+    <section id="transactions-view" hidden>
+      <div class="admin-title-row"><div><h1>Transações PIX</h1><p>Uma cobrança vigente por cliente até o pagamento ser confirmado.</p></div><div class="filter-row compact-filters"><label class="switch-label"><input type="checkbox" id="transactions-history"> Mostrar histórico completo</label><select class="filter-select" id="transactions-status"><option value="todos">Todos</option><option value="pendente">Aguardando pagamento</option><option value="pago">Pagos</option><option value="expirada">Expirados</option><option value="falhou">Recusados</option></select></div></div>
+      <div class="table-scroll admin-data-table"><table><thead><tr><th>Cliente</th><th>Gateway</th><th>Valor</th><th>Status</th><th>Tentativas</th><th>Criada em</th><th>Expira em</th><th>Paga em</th><th>ID na gateway</th></tr></thead><tbody id="transactions-body"><tr><td colspan="9">Carregando...</td></tr></tbody></table></div>
+    </section>
+
+    <section id="logs-view" hidden>
+      <div class="admin-title-row"><div><h1>Logs</h1><p>Últimos 100 registros de chamadas às gateways e de webhooks recebidos.</p></div></div>
+      <div class="tab-buttons"><button class="admin-btn secondary compact active" id="tab-webhooks" type="button">Webhooks recebidos</button><button class="admin-btn secondary compact" id="tab-payment-logs" type="button">Cobranças</button></div>
+      <div id="webhook-logs-pane"><div class="filter-row logs-filters"><select class="filter-select" id="logs-gateway"><option value="todas">Todas as gateways</option></select><select class="filter-select" id="logs-result"><option value="todos">Todos os resultados</option><option value="aceito">Aceitos</option><option value="invalido">Assinatura inválida</option><option value="sem-transacao">Transação não encontrada</option></select></div><div class="log-list" id="webhook-log-list"><div class="admin-empty">Carregando...</div></div></div>
+      <div id="payment-logs-pane" hidden><div class="log-list" id="payment-log-list"><div class="admin-empty">Carregando...</div></div></div>
+    </section>
+  </main>
+
+  <dialog class="admin-dialog" id="edit-dialog">
+    <form method="dialog" class="dialog-card" id="edit-form">
+      <div class="dialog-head"><h2>Editar cliente e fatura</h2><button value="cancel" class="icon-close" aria-label="Fechar">×</button></div>
+      <div class="form-grid"><label>Nome<input name="nome" id="edit-name"></label><label>Telefone<input name="telefone" id="edit-phone"></label><label>Valor em aberto (R$)<input name="valor_original" id="edit-original" type="number" step="0.01"></label><label>Valor com desconto (R$)<input name="valor_desconto" id="edit-discount" type="number" step="0.01"></label><label>Vencimento<input name="vencimento" id="edit-due" type="date"></label><label>Status<select name="status" id="edit-status"></select></label></div>
+      <div class="dialog-actions"><button value="cancel" class="admin-btn outline" type="button" data-close="edit-dialog">Cancelar</button><button class="admin-btn primary" id="save-edit" type="submit">Salvar</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="admin-dialog" id="delete-dialog"><form method="dialog" class="dialog-card small" id="delete-form"><div class="dialog-head"><h2>Apagar todos os clientes e faturas?</h2><button value="cancel" class="icon-close" aria-label="Fechar">×</button></div><p class="dialog-copy">Esta ação é <strong>irreversível</strong> e removerá <strong>todos os clientes, faturas e pagamentos</strong> do banco de dados. Os registros de acessos (métricas) são mantidos.</p><label class="stack-label">Para confirmar, digite <strong>APAGAR</strong><input id="delete-confirm" autocomplete="off" placeholder="APAGAR"></label><div class="dialog-actions"><button class="admin-btn outline" type="button" data-close="delete-dialog">Cancelar</button><button class="admin-btn danger" id="delete-all" type="submit" disabled>Apagar tudo</button></div></form></dialog>
+
+  <dialog class="admin-dialog wide" id="import-dialog"><div class="dialog-card import-card"><div class="dialog-head"><h2>Importar clientes</h2><button class="icon-close" type="button" data-close="import-dialog" aria-label="Fechar">×</button></div><div class="import-section"><h3>1. Envie a planilha</h3><div class="import-model-row"><button class="admin-btn outline compact" id="download-model" type="button">⇩ Baixar modelo</button><small>.xlsx, .xls ou .csv. Depois do upload você escolhe qual coluna vai em cada campo.</small></div><div class="dropzone" id="dropzone" tabindex="0"><div class="drop-icon">▦</div><strong>Arraste uma planilha ou clique para selecionar</strong><small>.xlsx, .xls, .csv</small><button class="admin-btn secondary compact" id="choose-file" type="button">⇧ Selecionar arquivo</button><input id="file-input" type="file" accept=".xlsx,.xls,.csv" hidden></div><div class="file-chip" id="file-chip" hidden><span id="file-name"></span><button id="clear-file" type="button">×</button></div></div><div id="mapping-section" hidden><div class="mapping-box"><h3>2. Relacione as colunas da sua planilha</h3><p>Para cada campo do sistema, escolha a coluna correspondente. Os exemplos mostram dados reais do seu arquivo.</p><label class="header-toggle"><input type="checkbox" id="no-header"> A primeira linha já é um dado (minha planilha não tem cabeçalho)</label><div class="mapping-grid" id="mapping-grid"></div><p class="mapping-missing" id="mapping-missing"></p></div><div class="due-box"><h3>3. Data de vencimento das faturas</h3><p>Todas as faturas desta importação receberão esta mesma data.</p><input id="import-due" type="date"></div><div class="preview-block"><h3>Prévia da planilha</h3><div class="table-scroll"><table><thead id="raw-head"></thead><tbody id="raw-body"></tbody></table></div><small id="raw-count"></small></div></div><div id="validation-section" hidden><h3>4. Confira e importe</h3><div class="validation-summary" id="validation-summary"></div><div class="table-scroll validation-table"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Email</th><th>Em aberto</th><th>Com desconto</th><th>Status</th><th>Situação</th></tr></thead><tbody id="validation-body"></tbody></table></div><p class="mapping-missing" id="due-warning"></p><div class="import-progress" id="import-progress" hidden><div><span id="progress-bar"></span></div><small id="progress-label"></small></div><button class="admin-btn primary full" id="run-import" type="button" disabled>Importar clientes</button></div></div></dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/vendor/xlsx.full.min.js"></script>
+  <script src="/assets/admin.js" defer></script>
+</body>
+</html>

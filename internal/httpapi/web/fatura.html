@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sua fatura — Fatura Móvel</title>
+  <meta name="description" content="Veja os detalhes da sua fatura: nome do cliente, telefone, valor total, valor com desconto à vista, vencimento e status.">
+  <meta property="og:title" content="Sua fatura — Fatura Móvel">
+  <meta property="og:description" content="Detalhes da fatura consultada pelo telefone, com valor com desconto e opção de pagar agora.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/assets/app.css">
+  <script defer src="/assets/vendor/qrcode.min.js"></script>
+  <script defer src="/assets/invoice.js"></script>
+</head>
+<body class="invoice-page">
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a href="/"><img class="brand brand-white" src="/assets/logo-claro.png" alt="Logo da operadora Claro"></a>
+      <a class="new-search" href="/"><span>←</span> Nova consulta</a>
+    </div>
+  </header>
+  <div id="invoice-app">
+    <section class="loading-page"><div class="spinner"></div><p>Consultando sua fatura…</p></section>
+  </div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

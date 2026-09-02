@@ -35,3 +35,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Build-time vendored frontend dependencies
+internal/httpapi/web/assets/vendor/xlsx.full.min.js
+internal/httpapi/web/assets/vendor/qrcode.min.js
