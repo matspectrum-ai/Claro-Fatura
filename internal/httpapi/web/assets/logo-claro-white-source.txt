@@ -1,1 +1,0 @@
-Derived from src/assets/logo-claro.png in the original application snapshot by removing the white raster background and converting the Claro mark to white while preserving antialiased edges. This note is not served by the application.
