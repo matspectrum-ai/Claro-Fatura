@@ -1,0 +1,125 @@
+/* Visual parity with the original React/Lucide admin. No business behavior lives here. */
+
+.admin-nav a::before,
+.admin-ghost::before,
+#clear-history::before,
+#open-import::before,
+#open-delete::before,
+#download-model::before,
+#choose-file::before,
+#new-gateway::before,
+.admin-btn[data-action="edit"]::before,
+.admin-btn[data-action="only"]::before,
+.admin-btn[data-action="remove"]::before,
+.copy-link[data-action="copy"]::before,
+.square-btn[data-pix]::before,
+.square-btn[data-edit]::before {
+  content:"";
+  display:block;
+  width:1rem;
+  height:1rem;
+  flex:0 0 1rem;
+  background-color:currentColor;
+  -webkit-mask-position:center;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-size:contain;
+  mask-position:center;
+  mask-repeat:no-repeat;
+  mask-size:contain;
+}
+
+.admin-nav a{font-size:0}
+.admin-nav a span{font-size:.875rem}
+.admin-nav [data-nav="dashboard"]::before{-webkit-mask-image:url('/assets/icons/chart-no-axes-column.svg');mask-image:url('/assets/icons/chart-no-axes-column.svg')}
+.admin-nav [data-nav="faturas"]::before{-webkit-mask-image:url('/assets/icons/file-text.svg');mask-image:url('/assets/icons/file-text.svg')}
+.admin-nav [data-nav="pagamentos"]::before{-webkit-mask-image:url('/assets/icons/receipt.svg');mask-image:url('/assets/icons/receipt.svg')}
+.admin-nav [data-nav="gateways"]::before{-webkit-mask-image:url('/assets/icons/shuffle.svg');mask-image:url('/assets/icons/shuffle.svg')}
+.admin-nav [data-nav="transacoes"]::before{-webkit-mask-image:url('/assets/icons/qr-code.svg');mask-image:url('/assets/icons/qr-code.svg')}
+.admin-nav [data-nav="logs"]::before{-webkit-mask-image:url('/assets/icons/scroll-text.svg');mask-image:url('/assets/icons/scroll-text.svg')}
+
+.admin-ghost{font-size:0}
+.admin-ghost span{font-size:.875rem}
+.admin-ghost::before{-webkit-mask-image:url('/assets/icons/log-out.svg');mask-image:url('/assets/icons/log-out.svg')}
+
+#clear-history,#open-import,#open-delete{font-size:0}
+#clear-history span,#open-import span,#open-delete span{font-size:.875rem}
+#clear-history::before,#open-delete::before{-webkit-mask-image:url('/assets/icons/trash-2.svg');mask-image:url('/assets/icons/trash-2.svg')}
+#open-import::before{-webkit-mask-image:url('/assets/icons/upload.svg');mask-image:url('/assets/icons/upload.svg')}
+
+.metric-card span{
+  display:block;
+  width:1.25rem;
+  height:1.25rem;
+  flex:0 0 1.25rem;
+  font-size:0;
+  background-color:currentColor;
+  -webkit-mask-position:center;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-size:contain;
+  mask-position:center;
+  mask-repeat:no-repeat;
+  mask-size:contain;
+}
+.metric-card:nth-child(1) span{-webkit-mask-image:url('/assets/icons/user-check.svg');mask-image:url('/assets/icons/user-check.svg')}
+.metric-card:nth-child(2) span{-webkit-mask-image:url('/assets/icons/users.svg');mask-image:url('/assets/icons/users.svg')}
+.metric-card:nth-child(3) span,.metric-card:nth-child(4) span{-webkit-mask-image:url('/assets/icons/file-text.svg');mask-image:url('/assets/icons/file-text.svg')}
+
+.admin-search>span{
+  width:1rem;
+  height:1rem;
+  font-size:0;
+  background-color:currentColor;
+  -webkit-mask:url('/assets/icons/search.svg') center/contain no-repeat;
+  mask:url('/assets/icons/search.svg') center/contain no-repeat;
+}
+
+.square-btn[data-pix],.square-btn[data-edit]{font-size:0;display:grid;place-items:center}
+.square-btn[data-pix]::before{-webkit-mask-image:url('/assets/icons/qr-code.svg');mask-image:url('/assets/icons/qr-code.svg')}
+.square-btn[data-edit]::before{-webkit-mask-image:url('/assets/icons/pencil.svg');mask-image:url('/assets/icons/pencil.svg')}
+
+#download-model,#choose-file,#new-gateway,.admin-btn[data-action="edit"],.admin-btn[data-action="only"],.admin-btn[data-action="remove"],.copy-link[data-action="copy"]{font-size:0}
+#download-model::before{-webkit-mask-image:url('/assets/icons/download.svg');mask-image:url('/assets/icons/download.svg')}
+#download-model::after{content:"Baixar modelo";font-size:.875rem}
+#choose-file::before{-webkit-mask-image:url('/assets/icons/upload.svg');mask-image:url('/assets/icons/upload.svg')}
+#choose-file::after{content:"Selecionar arquivo";font-size:.875rem}
+#new-gateway::before{-webkit-mask-image:url('/assets/icons/plus.svg');mask-image:url('/assets/icons/plus.svg')}
+#new-gateway::after{content:"Nova gateway";font-size:.875rem}
+
+.drop-icon{
+  width:2rem;
+  height:2rem;
+  font-size:0;
+  background-color:currentColor;
+  -webkit-mask:url('/assets/icons/file-spreadsheet.svg') center/contain no-repeat;
+  mask:url('/assets/icons/file-spreadsheet.svg') center/contain no-repeat;
+}
+
+.admin-btn[data-action="edit"]::before{-webkit-mask-image:url('/assets/icons/pencil.svg');mask-image:url('/assets/icons/pencil.svg')}
+.admin-btn[data-action="edit"]::after{content:"Editar";font-size:.875rem}
+.admin-btn[data-action="only"]::before{-webkit-mask-image:url('/assets/icons/zap.svg');mask-image:url('/assets/icons/zap.svg')}
+.admin-btn[data-action="only"]::after{content:"Usar somente esta";font-size:.875rem}
+.admin-btn[data-action="remove"]::before{-webkit-mask-image:url('/assets/icons/trash-2.svg');mask-image:url('/assets/icons/trash-2.svg')}
+.copy-link[data-action="copy"]::before{width:.75rem;height:.75rem;flex-basis:.75rem;-webkit-mask-image:url('/assets/icons/copy.svg');mask-image:url('/assets/icons/copy.svg')}
+.copy-link[data-action="copy"]::after{content:"copiar";font-size:.72rem}
+
+.gateway-icon{
+  display:block;
+  width:.875rem;
+  height:.875rem;
+  flex:0 0 .875rem;
+  font-size:0;
+  background-color:currentColor;
+  -webkit-mask-position:center;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-size:contain;
+  mask-position:center;
+  mask-repeat:no-repeat;
+  mask-size:contain;
+}
+.gateway-line.ok .gateway-icon{-webkit-mask-image:url('/assets/icons/circle-check-big.svg');mask-image:url('/assets/icons/circle-check-big.svg')}
+.gateway-line.warn .gateway-icon{-webkit-mask-image:url('/assets/icons/triangle-alert.svg');mask-image:url('/assets/icons/triangle-alert.svg')}
+
+/* Match original Tailwind spacing more closely. */
+.admin-main{padding-bottom:2rem}
+
+@media(min-width:640px){.auth-card{padding:2rem}}
