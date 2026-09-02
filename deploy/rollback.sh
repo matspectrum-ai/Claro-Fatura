@@ -10,16 +10,27 @@ BASE=/opt/claro-fatura
 CURRENT="$BASE/current"
 PREVIOUS="$BASE/previous"
 
+for cmd in readlink ln mv systemctl curl seq; do
+  command -v "$cmd" >/dev/null 2>&1 || { echo "Comando obrigatório ausente: $cmd" >&2; exit 1; }
+done
+
 if [[ ! -L "$CURRENT" || ! -L "$PREVIOUS" ]]; then
   echo "Não há release anterior registrada para rollback." >&2
   exit 1
 fi
 
+atomic_link() {
+  local target="$1" link="$2" tmp="${2}.tmp.$$"
+  rm -f "$tmp"
+  ln -s "$target" "$tmp"
+  mv -Tf "$tmp" "$link"
+}
+
 current_target="$(readlink -f "$CURRENT")"
 previous_target="$(readlink -f "$PREVIOUS")"
 
-ln -sfn "$previous_target" "$CURRENT"
-ln -sfn "$current_target" "$PREVIOUS"
+atomic_link "$previous_target" "$CURRENT"
+atomic_link "$current_target" "$PREVIOUS"
 systemctl restart claro-fatura.service
 
 for _ in $(seq 1 30); do
