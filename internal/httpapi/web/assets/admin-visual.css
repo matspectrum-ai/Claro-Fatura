@@ -28,7 +28,7 @@
   mask-size:contain;
 }
 
-.admin-nav a{font-size:0}
+.admin-body .admin-nav a{font-size:0}
 .admin-nav a span{font-size:.875rem}
 .admin-nav [data-nav="dashboard"]::before{-webkit-mask-image:url('/assets/icons/chart-no-axes-column.svg');mask-image:url('/assets/icons/chart-no-axes-column.svg')}
 .admin-nav [data-nav="faturas"]::before{-webkit-mask-image:url('/assets/icons/file-text.svg');mask-image:url('/assets/icons/file-text.svg')}
@@ -46,7 +46,7 @@
 #clear-history::before,#open-delete::before{-webkit-mask-image:url('/assets/icons/trash-2.svg');mask-image:url('/assets/icons/trash-2.svg')}
 #open-import::before{-webkit-mask-image:url('/assets/icons/upload.svg');mask-image:url('/assets/icons/upload.svg')}
 
-.metric-card span{
+.admin-body .metric-card span{
   display:block;
   width:1.25rem;
   height:1.25rem;
@@ -85,7 +85,7 @@
 #new-gateway::before{-webkit-mask-image:url('/assets/icons/plus.svg');mask-image:url('/assets/icons/plus.svg')}
 #new-gateway::after{content:"Nova gateway";font-size:.875rem}
 
-.drop-icon{
+.admin-body .drop-icon{
   width:2rem;
   height:2rem;
   font-size:0;
@@ -120,6 +120,4 @@
 .gateway-line.warn .gateway-icon{-webkit-mask-image:url('/assets/icons/triangle-alert.svg');mask-image:url('/assets/icons/triangle-alert.svg')}
 
 /* Match original Tailwind spacing more closely. */
-.admin-main{padding-bottom:2rem}
-
-@media(min-width:640px){.auth-card{padding:2rem}}
+.admin-body .admin-main{padding-bottom:2rem}
