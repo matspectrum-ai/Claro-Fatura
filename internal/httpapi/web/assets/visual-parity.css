@@ -1,3 +1,4 @@
+:root{--accent:oklch(.955 .02 30);--accent-foreground:oklch(.42 .18 27)}
 [hidden]{display:none!important}
 .brand-white-logo{display:block;width:auto;height:36px;padding:0 12px;object-fit:contain}
 .invoice-page .brand-white-logo{padding:4px 12px}
@@ -15,9 +16,11 @@
 .state-box .lucide{flex:0 0 auto}
 .notice-icon .lucide{margin-inline:auto}
 
-/* React/shadcn auth geometry from the original app. */
+/* React/shadcn auth geometry and theme from the original app. */
+.auth-page{background:linear-gradient(180deg,oklch(.99 .004 255),oklch(.96 .008 255))}
 .auth-form[hidden]{display:none!important}
 .auth-card{border-radius:1rem}
+.auth-icon{background:var(--accent);color:var(--accent-foreground)}
 .auth-card .button{height:2.5rem;border-radius:.375rem;font-size:.875rem;font-weight:500;padding-inline:2rem}
 .auth-form input{height:2.25rem;border-radius:.375rem}
 .auth-tabs{height:2.25rem;border-radius:.5rem;padding:.25rem;align-items:center}
