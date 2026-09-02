@@ -12,10 +12,17 @@ if [[ -z "$BINARY" || ! -f "$BINARY" ]]; then
   echo "Uso: sudo bash deploy/release.sh <caminho-binario> [release-id]" >&2
   exit 1
 fi
+if [[ ! "$RELEASE_ID" =~ ^[A-Za-z0-9._-]+$ ]] || [[ "$RELEASE_ID" == .* ]] || [[ "$RELEASE_ID" == *..* ]]; then
+  echo "Release ID inválido: $RELEASE_ID" >&2
+  exit 1
+fi
 if [[ ! -f /etc/claro-fatura/claro-fatura.env ]]; then
   echo "Arquivo /etc/claro-fatura/claro-fatura.env ausente." >&2
   exit 1
 fi
+for cmd in install readlink ln systemctl curl seq sed; do
+  command -v "$cmd" >/dev/null 2>&1 || { echo "Comando obrigatório ausente: $cmd" >&2; exit 1; }
+done
 
 BASE=/opt/claro-fatura
 RELEASE="$BASE/releases/$RELEASE_ID"
