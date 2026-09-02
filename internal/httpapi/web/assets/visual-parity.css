@@ -11,3 +11,5 @@
 .check-grid .lucide{color:var(--primary)}
 .secure-note .lucide{color:currentColor}
 .auth-form[hidden]{display:none!important}
+.card-brand{background-color:var(--primary);background-image:url('/assets/logo-claro-white.png');background-repeat:no-repeat;background-position:1rem center;background-size:auto 36px}
+.card-brand .brand-white{visibility:hidden}
