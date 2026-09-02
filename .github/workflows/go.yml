@@ -6,6 +6,7 @@ on:
       - 'refactor/**'
       - 'perf/**'
       - 'infra/**'
+      - 'fix/**'
   pull_request:
     branches:
       - main
@@ -29,6 +30,16 @@ jobs:
         run: |
           bash scripts/fetch-sheetjs.sh
           bash scripts/fetch-qrcode.sh
+      - name: Public visual assets
+        run: |
+          file internal/httpapi/web/assets/banner-casal.webp internal/httpapi/web/assets/logo-claro.png internal/httpapi/web/assets/logo-claro-white.png
+          file internal/httpapi/web/assets/banner-casal.webp | grep -qi 'Web/P image'
+          file internal/httpapi/web/assets/logo-claro-white.png | grep -qi 'PNG image data'
+          test -s internal/httpapi/web/assets/banner-casal.webp
+          test -s internal/httpapi/web/assets/logo-claro-white.png
+          grep -q 'logo-claro-white.png' internal/httpapi/web/index.html
+          grep -q 'visual-parity.css' internal/httpapi/web/auth.html
+          grep -Fq '[hidden]{display:none!important}' internal/httpapi/web/assets/visual-parity.css
       - name: JavaScript syntax
         run: |
           node --check internal/httpapi/web/assets/home.js
